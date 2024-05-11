@@ -2,8 +2,8 @@
 // Building a person from a name
 
 import { Just, Maybe, isNothing } from '../../maybe';
-import { Name } from '../../name';
-import { Person } from '../../person';
+import { Name } from './name';
+import { Person } from './person';
 
 // it would be nice to re-use the original createPerson function,
 // as this function may be coming from a library or another module

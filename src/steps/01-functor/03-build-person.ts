@@ -2,8 +2,8 @@
 // Building a person from a name
 
 import { Just, Maybe, Nothing } from '../../maybe';
-import { Name } from '../../name';
-import { Person } from '../../person';
+import { Name } from './name';
+import { Person } from './person';
 
 const string = 'Virginia';
 

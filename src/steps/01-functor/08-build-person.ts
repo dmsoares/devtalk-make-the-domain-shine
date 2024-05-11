@@ -3,7 +3,7 @@
 
 import { Just, Maybe, isNothing } from '../../maybe';
 import { Name } from './name';
-import { Person } from '../../person';
+import { Person } from './person';
 
 type CreatePerson = (name: Name) => Person;
 const createPerson: CreatePerson = name => new Person(name);
