@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "lib": ["es2020"],
+        "moduleResolution": "node",
+        "noUnusedLocals": false,
+        "noUnusedParameters": true,
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "noEmit": true,
+        "target": "es2017",
+        "outDir": "./dist",
+        "declaration": true,
+    },
+    "exclude": ["node_modules"]
+}
+
