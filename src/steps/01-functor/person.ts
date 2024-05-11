@@ -1,5 +1,11 @@
 import { Name } from './name';
 
-export class Person {
-    constructor(readonly name: Name) {}
-}
+const sym: unique symbol = Symbol();
+
+export type Person = {
+    [sym]: typeof sym;
+    name: Name;
+};
+
+export type CreatePerson = (name: Name) => Person;
+export const createPerson: CreatePerson = name => ({ [sym]: sym, name });

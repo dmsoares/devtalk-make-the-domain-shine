@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "esModuleInterop": true,
-        "lib": ["es2020"],
+        "lib": ["es2020", "dom"],
         "moduleResolution": "node",
         "noUnusedLocals": false,
         "noUnusedParameters": true,
