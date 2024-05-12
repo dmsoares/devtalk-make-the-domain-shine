@@ -11,3 +11,9 @@ yarn-error.log*
 *.tsbuildinfo
 .npm
 .eslintcache
+
+# Serverless directories
+.serverless
+
+# Esbuild directories
+.esbuild
