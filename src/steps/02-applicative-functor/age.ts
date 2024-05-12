@@ -1,4 +1,5 @@
-import { Just, Maybe, Nothing } from '../../maybe';
+import { Either, Left, Right } from '../../either';
+import { ValidationError, WorkflowError } from './error';
 
 const sym: unique symbol = Symbol();
 
@@ -9,11 +10,13 @@ export type Age = {
 
 const buildAge = (value: string): Age => ({ [sym]: sym, value });
 
-export const parseAge = (string: string): Maybe<Age> => {
+export const parseAge = (string: string): Either<WorkflowError, Age> => {
     try {
         const value = parseInt(string, 10);
-        return isNaN(value) ? Nothing() : Just(buildAge(value.toString()));
+        return isNaN(value) || value < 0 || value > 120
+            ? Left(ValidationError('invalid age'))
+            : Right(buildAge(value.toString()));
     } catch {
-        return Nothing();
+        return Left(ValidationError('invalid age'));
     }
 };

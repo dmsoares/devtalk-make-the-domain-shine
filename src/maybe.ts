@@ -15,12 +15,17 @@ export const Just = <A>(value: A): Just<A> => ({ tag: 'Just', value });
 export const isNothing = <A>(m: Maybe<A>): m is Nothing => m.tag === 'Nothing';
 export const isJust = <A>(m: Maybe<A>): m is Just<A> => !isNothing(m);
 
+// Functor
 type Map = <A, B>(f: (x: A) => B) => (mx: Maybe<A>) => Maybe<B>;
 export const map: Map = f => mx => isNothing(mx) ? mx : Just(f(mx.value));
 
+// Applicative
+type Pure = <A>(a: A) => Maybe<A>;
+export const pure: Pure = a => Just(a);
+
 type Ap = <A, B>(fab: Maybe<(a: A) => B>) => (fa: Maybe<A>) => Maybe<B>;
 export const ap: Ap = fab => fa =>
-    isNothing(fab) ? Nothing() : isNothing(fa) ? Nothing() : Just(fab.value(fa.value));
+    isNothing(fab) ? fab : isNothing(fa) ? fa : Just(fab.value(fa.value));
 
 type LiftA3 = <A, B, C, D>(
     f: (a: A) => (b: B) => (c: C) => D,
@@ -28,4 +33,4 @@ type LiftA3 = <A, B, C, D>(
     fb: Maybe<B>,
     fc: Maybe<C>
 ) => Maybe<D>;
-export const liftA3: LiftA3 = (f, fa, fb, fc) => ap(ap(map(f)(fa))(fb))(fc);
+export const liftA3: LiftA3 = (f, fa, fb, fc) => ap(ap(ap(pure(f))(fa))(fb))(fc);

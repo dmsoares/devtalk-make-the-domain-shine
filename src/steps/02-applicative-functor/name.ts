@@ -1,4 +1,5 @@
-import { Just, Maybe, Nothing } from '../../maybe';
+import { Either, Left, Right } from '../../either';
+import { ValidationError, WorkflowError } from './error';
 
 const sym: unique symbol = Symbol();
 
@@ -9,14 +10,8 @@ export type Name = {
 
 const buildName = (value: string): Name => ({ [sym]: sym, value });
 
-export type ParseName = (string: string) => Maybe<Name>;
+export type ParseName = (string: string) => Either<WorkflowError, Name>;
 export const parseName: ParseName = string =>
-    string.length < 4 && string.length > 50 ? Nothing() : Just(buildName(string));
-
-export type UnsafeParseName = (string: string) => Name;
-export const unsafeParseName: UnsafeParseName = string => {
-    if (string.length < 4 || string.length > 50) {
-        throw new Error('Invalid name');
-    }
-    return buildName(string);
-};
+    string.length < 4 && string.length > 50
+        ? Left(ValidationError('invalid name'))
+        : Right(buildName(string));
