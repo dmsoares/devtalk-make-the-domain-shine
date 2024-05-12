@@ -1,6 +1,6 @@
-import { Age } from './age';
-import { Name } from './name';
-import { Status } from './status';
+import { Age } from '../age';
+import { Name } from '../name';
+import { Status } from '../status';
 
 const sym: unique symbol = Symbol();
 
@@ -10,14 +10,6 @@ export type Person = {
     age: Age;
     status: Status;
 };
-
-export type CreatePerson0 = (name: Name, age: Age, status: Status) => Person;
-export const createPerson0: CreatePerson0 = (name, age, status) => ({
-    [sym]: sym,
-    name,
-    age,
-    status
-});
 
 export type CreatePerson = (name: Name) => (age: Age) => (status: Status) => Person;
 export const createPerson: CreatePerson = name => age => status => ({

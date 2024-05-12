@@ -1,26 +1,26 @@
-export interface WorkflowError {
+export interface ApplicationError {
     readonly tag: 'DomainError' | 'DeserializationError' | 'ValidationError' | 'UnknownError';
     readonly message: string;
     readonly error?: Error;
 }
 
-export const DomainError = (message: string, error?: Error): WorkflowError => ({
+export const DomainError = (message: string, error?: Error): ApplicationError => ({
     tag: 'DomainError',
     message,
     error
 });
 
-export const DeserializationError = (message: string): WorkflowError => ({
+export const DeserializationError = (message: string): ApplicationError => ({
     tag: 'DeserializationError',
     message
 });
 
-export const ValidationError = (message: string): WorkflowError => ({
+export const ValidationError = (message: string): ApplicationError => ({
     tag: 'ValidationError',
     message
 });
 
-export const UnknownError = (error: Error): WorkflowError => ({
+export const UnknownError = (error: Error): ApplicationError => ({
     tag: 'UnknownError',
     message: error.message,
     error

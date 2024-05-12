@@ -1,0 +1,19 @@
+service: dev-talk-api
+frameworkVersion: '3'
+
+provider:
+    name: aws
+    runtime: nodejs18.x
+    region: eu-west-2
+
+plugins:
+    - serverless-esbuild
+    - serverless-offline
+
+functions:
+    createPerson:
+        handler: src/example-app/functions/person/create/index.handler
+        events:
+            - httpApi:
+                  path: /person
+                  method: POST
