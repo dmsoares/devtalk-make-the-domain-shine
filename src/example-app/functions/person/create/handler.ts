@@ -7,6 +7,7 @@ import { Person, createPerson } from './domain/person';
 import { parseName } from './domain/name';
 import { parseAge } from './domain/age';
 import { Active } from './domain/status';
+import { handleError, status200 } from './error';
 
 interface CreatePersonDTO {
     name: string;
@@ -20,12 +21,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     return either(
         person,
-        async err => status400(err.message),
+        async err => handleError(err),
         async person =>
-            either(
-                await savePerson(person),
-                err => status500(err.message),
-                savedPerson => status200(JSON.stringify(savedPerson))
+            either(await savePerson(person), handleError, savedPerson =>
+                status200(JSON.stringify(savedPerson))
             )
     );
 };
@@ -44,18 +43,3 @@ const savePerson = async (person: Person): Promise<Either<ApplicationError, Pers
     }
     return E.right(person);
 };
-
-const status200 = (message: string): APIGatewayProxyResult => ({
-    statusCode: 200,
-    body: JSON.stringify({ message })
-});
-
-const status400 = (message: string): APIGatewayProxyResult => ({
-    statusCode: 400,
-    body: JSON.stringify({ message })
-});
-
-const status500 = (message: string): APIGatewayProxyResult => ({
-    statusCode: 500,
-    body: JSON.stringify({ message })
-});
