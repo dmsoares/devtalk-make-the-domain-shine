@@ -1,8 +1,19 @@
 export interface ApplicationError {
-    readonly tag: 'DomainError' | 'DeserializationError' | 'ValidationError' | 'UnknownError';
+    readonly tag:
+        | 'PersistenceError'
+        | 'DomainError'
+        | 'DeserializationError'
+        | 'ValidationError'
+        | 'UnknownError';
     readonly message: string;
     readonly error?: Error;
 }
+
+export const PersistenceError = (message: string, error?: Error): ApplicationError => ({
+    tag: 'PersistenceError',
+    message,
+    error
+});
 
 export const DomainError = (message: string, error?: Error): ApplicationError => ({
     tag: 'DomainError',

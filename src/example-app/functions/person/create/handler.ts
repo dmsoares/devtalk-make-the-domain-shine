@@ -1,15 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import * as E from 'fp-ts/Either';
-import * as TE from 'fp-ts/TaskEither';
-import { TaskEither } from 'fp-ts/TaskEither';
 import { Either } from 'fp-ts/Either';
-import { liftA3 } from '../../../lib/either';
-import { ApplicationError, DeserializationError } from './domain/error';
+import { bind, either, liftA3 } from '../../../lib/either';
+import { ApplicationError, DeserializationError, PersistenceError } from './domain/error';
 import { Person, createPerson } from './domain/person';
 import { parseName } from './domain/name';
 import { parseAge } from './domain/age';
 import { Active } from './domain/status';
-import { pipe } from 'fp-ts/function';
 
 interface CreatePersonDTO {
     name: string;
@@ -17,24 +14,20 @@ interface CreatePersonDTO {
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const workflow = pipe(
-        TE.fromEither(
-            pipe(
-                deserializeDTO(event.body),
-                E.chain(({ name, age }) =>
-                    liftA3(createPerson, parseName(name), parseAge(age), E.right(Active()))
-                )
-            )
-        ),
-        TE.chain(savePerson)
+    const person = bind(deserializeDTO(event.body), ({ name, age }) =>
+        liftA3(createPerson, parseName(name), parseAge(age), E.right(Active()))
     );
 
-    const result = await workflow();
-
-    return E.match(
-        error => status400(String(error)),
-        () => status200('Person created')
-    )(result);
+    return either(
+        person,
+        async err => status400(err.message),
+        async person =>
+            either(
+                await savePerson(person),
+                err => status500(err.message),
+                savedPerson => status200(JSON.stringify(savedPerson))
+            )
+    );
 };
 
 const deserializeDTO = (body: string | null): Either<ApplicationError, CreatePersonDTO> => {
@@ -45,9 +38,11 @@ const deserializeDTO = (body: string | null): Either<ApplicationError, CreatePer
     return E.right({ name, age });
 };
 
-const savePerson = (person: Person): TaskEither<ApplicationError, Person> => {
-    console.log('Saving person...');
-    return TE.of(person);
+const savePerson = async (person: Person): Promise<Either<ApplicationError, Person>> => {
+    if (Math.random() < 0.2) {
+        return E.left(PersistenceError('Failed to save person'));
+    }
+    return E.right(person);
 };
 
 const status200 = (message: string): APIGatewayProxyResult => ({
@@ -57,5 +52,10 @@ const status200 = (message: string): APIGatewayProxyResult => ({
 
 const status400 = (message: string): APIGatewayProxyResult => ({
     statusCode: 400,
+    body: JSON.stringify({ message })
+});
+
+const status500 = (message: string): APIGatewayProxyResult => ({
+    statusCode: 500,
     body: JSON.stringify({ message })
 });
