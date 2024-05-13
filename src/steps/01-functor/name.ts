@@ -13,8 +13,7 @@ export type ParseName = (string: string) => Maybe<Name>;
 export const parseName: ParseName = string =>
     string.length < 4 && string.length > 50 ? Nothing() : Just(buildName(string));
 
-export type UnsafeParseName = (string: string) => Name;
-export const unsafeParseName: UnsafeParseName = string => {
+export const unsafeParseName = (string: string): Name => {
     if (string.length < 4 || string.length > 50) {
         throw new Error('Invalid name');
     }

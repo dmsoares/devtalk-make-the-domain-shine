@@ -1,5 +1,4 @@
 // Making the Domain shine with functional programming and ADTs
-// Domain-first development with functional programming and ADTs
 
 import { Just, Maybe, isJust, isNothing } from '../../maybe';
 import { Name, parseName, unsafeParseName } from './name';
@@ -127,8 +126,7 @@ const mapMaybe: MapMaybe = f => mx => isNothing(mx) ? mx : Just(f(mx.value));
 // We can now rewrite our `maybeFunction` using `mapMaybe`.
 const workflow8 = (names: string[]) => {
     const persons = names
-        .map(parseName) // returns `Maybe<Name>[]`
-        .map(mapMaybe(createPerson)) // returns `Maybe<Person>[]`
+        .map(x => mapMaybe(createPerson)(parseName(x))) // returns `Maybe<Name>[]`
         .filter(isJust) // returns `Maybe<Person>[]`
         .map(j => j.value); // returns `Person[]`
 };
