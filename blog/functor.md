@@ -1,4 +1,4 @@
-Title: Leveraging Functional Programming and ADTs to Illuminate Domain Logic
+Title: Leveraging Functional Programming and ADTs in Typescript
 
 In the realm of software development, especially in the domain-driven design paradigm, clarity and safety are paramount. How do we ensure that our code not only functions correctly but also remains comprehensible and resilient to errors? One approach gaining traction for a few years now is the fusion of functional programming concepts with Algebraic Data Types (ADTs). In this article, we'll explore some scenarios that can help illustrate what programming with functional programming and ADTs can look like.
 
@@ -67,16 +67,24 @@ interface Just<A> {
     readonly value: A;
 }
 
-type Maybe<A> = Nothing | Just<A>;
+export type Maybe<A> = Nothing | Just<A>;
+
+export const Nothing = (): Nothing => ({ tag: 'Nothing' });
+export const Just = <A>(value: A): Just<A> => ({ tag: 'Just', value });
+
+export const isNothing = <A>(m: Maybe<A>): m is Nothing => m.tag === 'Nothing';
+export const isJust = <A>(m: Maybe<A>): m is Just<A> => !isNothing(m);
 ```
 
 And define a new `parseName` function:
 
 ```typescript
 // name.ts
+import * as M from 'maybe'
+
 type ParseName = (s: string) => Maybe<Name>;
 const parseName: ParseName = string =>
-    string.length < 4 && string.length > 50 ? Nothing() : Just(buildName(string));
+    string.length < 4 && string.length > 50 ? M.Nothing() : M.Just(buildName(string));
 ```
 
 Our initial attempt might look like this:
@@ -91,9 +99,11 @@ But alas, `parseName` now returns a `Maybe<Name>`, necessitating a change in str
 
 Let's begin by unwrapping this `Maybe<Name>`, and match on both the `Nothing` and `Just` cases:
 ```typescript
+import * as M from 'maybe'
+
 const workflow = (name: string) => {
     const maybeName = parseName(name);
-    const maybePerson = isNothing(maybeName) ? Nothing() : Just(createPerson(maybeName.value))
+    const maybePerson = M.isNothing(maybeName) ? M.Nothing() : M.Just(createPerson(maybeName.value))
 };
 ```
 What did we do here? Well, if creating a `Person` depends on a `Name` that may not exist then a `Person` may also not exist.
@@ -102,37 +112,52 @@ While functional, this approach introduces conditional complexity. There is a pa
 
 ### Harnessing the Power of Functors
 
-Simply put, a Functor is a generic container with a `map` function. You may be familiar with the `map` method on arrays. That method is but an instance of a more general concept. If we look closely, whenever we call `map` we are transforming a function of type `(x: A) => B` into a new function of type `(xs: A[]) => B[]` and applying it to the array.
+Simply put, a Functor is a generic container with a `map` function. You may be familiar with the `map` method on arrays. That method is but an instance of a more general concept. If we look closely, whenever we call `map` we are transforming a function of type `(x: A) => B` into a new function of type `(xs: Array<A>) => Array<B>` and applying it to the array.
 
-In much the same way, we want our `mapMaybe` to take a function of type `(x: A) => B` into a function of type `(mx: Maybe<A>) => Maybe<B>`:
+In much the same way, we want our `map` on `Maybe` to take a function of type `(x: A) => B` into a function of type `(mx: Maybe<A>) => Maybe<B>`:
 
 ```typescript
 // maybe.ts
 
 // we are using curried arguments for extra flexibility
-type MapMaybe = <A, B>(f: (x: A) => B) => (mx: Maybe<A>) => Maybe<B>;
-const mapMaybe: MapMaybe = f => mx => isNothing(mx) ? mx : Just(f(mx.value));
+type Map = <A, B>(f: (x: A) => B) => (mx: Maybe<A>) => Maybe<B>;
+const map: Map = f => mx => M.isNothing(mx) ? mx : M.Just(f(mx.value));
 ```
 
 By transforming our `Maybe` type into a Functor, we can simplify our original approach, and proceed with the workflow:
 
 ```typescript
-const workflow = (name: string) => {
-    const maybePerson = mapMaybe(createPerson)(parseName(name));
+import * as M from 'maybe'
 
-    if (isJust(maybePerson)) {
+const workflow = (name: string) => {
+    const maybePerson = M.map(createPerson)(parseName(name));
+
+    if (M.isJust(maybePerson)) {
         // we can now safely use the person
         const person = maybePerson.value;
     }
 };
 ```
 
+We can also map multiple times:
+```typescript
+import * as M from 'maybe'
+
+const workflow = (name: string) => {
+    const getNameFromPerson = (person: Person) => person.name;
+
+    const maybePersonName = M.map(getNameFromPerson)(M.map(createPerson)(parseName(name)));
+};
+```
+
 A different scenario where we want to create multiple `Person` objects from a list of unparsed strings, and simply ignore invalid ones:
 ```typescript
+import * as M from 'maybe'
+
 const workflow = (names: string[]) => {
     const persons = names
-        .map(x => mapMaybe(createPerson)(parseName(x)))
-        .filter(isJust)
+        .map(x => M.map(createPerson)(parseName(x)))
+        .filter(M.isJust)
         .map(j => j.value);
 };
 ```
@@ -153,4 +178,6 @@ const workflow = (names: string[]) => {
 ```
 ### Conclusion
 
-In conclusion, I hope this small example can spark the curiosity to know more about functional programming and ADTs, in particular in contexts where domain-driven design is valued.
+In conclusion, I hope this small example can spark the curiosity to know more about functional programming and ADTs, in particular in contexts where the domain and business logic should take center stage.
+
+If you are interested, you can check libraries such as [fp-ts](https://gcanti.github.io/fp-ts/), with many implementations of functional programming patterns.

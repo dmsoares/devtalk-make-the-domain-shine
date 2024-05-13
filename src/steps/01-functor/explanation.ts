@@ -82,10 +82,26 @@ const maybeFunction: MaybeFunction = f => mx => isNothing(mx) ? mx : Just(f(mx.v
 // Let's use our new `maybeFunction`.
 const workflow5 = (name: string) => {
     const maybePerson = maybeFunction(createPerson)(parseName(name));
+
+    if (isJust(maybePerson)) {
+        // we can now safely use the person
+        const person = maybePerson.value;
+    }
 };
 
 // Our curried definition allows us to partially apply the function.
 // Which, in turn, gives us more flexibility and expressiveness.
+
+const workflow = (name: string) => {
+    const getNameFromPerson = (person: Person) => person.name;
+
+    const maybePerson = mapMaybe(getNameFromPerson)(mapMaybe(createPerson)(parseName(name)));
+
+    if (isJust(maybePerson)) {
+        // we can now safely use the person
+        const person = maybePerson.value;
+    }
+};
 
 // Let's imagine a scenario where we would like to keep only valid persons.
 const workflow6 = (names: string[]) => {
