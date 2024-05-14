@@ -95,7 +95,7 @@ const workflow5 = (name: string) => {
 const workflow = (name: string) => {
     const getNameFromPerson = (person: Person) => person.name;
 
-    const maybePerson = mapMaybe(getNameFromPerson)(mapMaybe(createPerson)(parseName(name)));
+    const maybePerson = M.map(getNameFromPerson)(M.map(createPerson)(parseName(name)));
 
     if (isJust(maybePerson)) {
         // we can now safely use the person
