@@ -178,7 +178,7 @@ const workflow = (names: string[]) => {
 };
 ```
 
-The example above, to my taste, is less declarative and it is harder to see what we are trying to achieve.
+This, to my taste, is less declarative and it is harder to see what we are trying to achieve.
 
 ### Conclusion
 
