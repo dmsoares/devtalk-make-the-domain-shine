@@ -1,4 +1,5 @@
-Title: Leveraging Functional Programming and ADTs in Typescript
+# Leveraging Functional Programming and ADTs in Typescript
+## Part I: Functor
 
 In the realm of software development, especially in the domain-driven design paradigm, clarity and safety are paramount. How do we ensure that our code not only functions correctly but also remains comprehensible and resilient to errors? One approach gaining traction for a few years now is the fusion of functional programming concepts with Algebraic Data Types (ADTs). In this article, we'll explore some scenarios that can help illustrate what programming with functional programming and ADTs can look like.
 
@@ -162,7 +163,7 @@ const workflow = (names: string[]) => {
 };
 ```
 
-What it could look like had we used exceptions:
+Just for comparison, here's what it could look like had we used exceptions:
 ```typescript
 const workflow = (names: string[]) => {
     const validNames: Name[] = [];
@@ -176,6 +177,9 @@ const workflow = (names: string[]) => {
     const persons = validNames.map(createPerson);
 };
 ```
+
+The example above, to my taste, is less declarative and it is harder to see what we are trying to achieve.
+
 ### Conclusion
 
 In conclusion, I hope this small example can spark the curiosity to know more about functional programming and ADTs, in particular in contexts where the domain and business logic should take center stage.

@@ -11,18 +11,19 @@ export type Person = {
     status: Status;
 };
 
-export type CreatePerson0 = (name: Name, age: Age, status: Status) => Person;
-export const createPerson0: CreatePerson0 = (name, age, status) => ({
+export const createPerson0 = (name: Name, age: Age, status: Status): Person => ({
     [sym]: sym,
     name,
     age,
     status
 });
 
-export type CreatePerson = (name: Name) => (age: Age) => (status: Status) => Person;
-export const createPerson: CreatePerson = name => age => status => ({
-    [sym]: sym,
-    name,
-    age,
-    status
-});
+export const createPerson =
+    (name: Name) =>
+    (age: Age) =>
+    (status: Status): Person => ({
+        [sym]: sym,
+        name,
+        age,
+        status
+    });

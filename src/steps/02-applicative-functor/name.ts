@@ -1,4 +1,5 @@
-import { Either, Left, Right } from '../../either';
+import * as E from '../../either';
+import { Either } from '../../either';
 import { ValidationError, WorkflowError } from './error';
 
 const sym: unique symbol = Symbol();
@@ -10,8 +11,7 @@ export type Name = {
 
 const buildName = (value: string): Name => ({ [sym]: sym, value });
 
-export type ParseName = (string: string) => Either<WorkflowError, Name>;
-export const parseName: ParseName = string =>
+export const parseName = (string: string): Either<WorkflowError, Name> =>
     string.length < 4 && string.length > 50
-        ? Left(ValidationError('invalid name'))
-        : Right(buildName(string));
+        ? E.Left(ValidationError('invalid name'))
+        : E.Right(buildName(string));

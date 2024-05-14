@@ -22,7 +22,7 @@ export const map: Map = f => mx => isLeft(mx) ? mx : Right(f(mx.right));
 
 // Applicative
 type Pure = <L, A>(a: A) => Either<L, A>;
-export const pure: Pure = a => Right(a);
+export const pure: Pure = Right;
 
 type Ap = <L, A, B>(fab: Either<L, (a: A) => B>) => (fa: Either<L, A>) => Either<L, B>;
 export const ap: Ap = fab => fa => isLeft(fab) ? fab : isLeft(fa) ? fa : Right(fab.right(fa.right));

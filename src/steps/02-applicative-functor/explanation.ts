@@ -1,26 +1,27 @@
-import { Right, isLeft } from '../../either';
+import { Either, Right, isLeft } from '../../either';
 import * as E from '../../either';
-import { parseAge } from './age';
-import { parseName } from './name';
-import { createPerson0, createPerson } from './person';
-import { Active } from './status';
+import { Age, parseAge } from './age';
+import { WorkflowError } from './error';
+import { Name, parseName } from './name';
+import { createPerson0, createPerson, Person } from './person';
+import { Active, Status } from './status';
 
 // Let's imagine a new scenario where a Person has both an Age and a Status, along with a Name.
 
 // [show the person type]
 
-const workflow0 = (rawName: string, rawAge: string) => {
+const workflow0 = (rawName: string, rawAge: number) => {
     // Unfortunately, `map` cannot handle functions with more than one argument.
     const createPerson = E.map(createPerson0);
     //                         ^ Error: Target signature provides too few arguments. Expected 3 or more, but got 1.'
 };
 
 // We need to manually unpack the `Either` values and pass them to `createPerson`.
-const workflow1 = (rawName: string, rawAge: string) => {
-    const name = parseName(rawName);
-    const age = parseAge(rawAge);
+const workflow1 = (rawName: string, rawAge: number) => {
+    const name: Either<WorkflowError, Name> = parseName(rawName);
+    const age: Either<WorkflowError, Age> = parseAge(rawAge);
 
-    let result;
+    let result: Either<WorkflowError, Person>;
 
     if (isLeft(name)) {
         result = name;
@@ -41,14 +42,14 @@ const workflow1 = (rawName: string, rawAge: string) => {
 
 // We can now use `map` to apply `createPerson` to a `Either` value.
 
-const workflow2 = (rawName: string, rawAge: string) => {
-    const maybeCreatePerson = E.map(createPerson);
+const workflow = (rawName: string, rawAge: number) => {
+    const tryCreatePerson = E.map(createPerson)(parseName(rawName));
 };
 
 // [show the drawings of applying `map` to `createPerson`]
 // [what is the type of `maybeCreatePerson`?]
 
-const workflow3 = (rawName: string, rawAge: string) => {
+const workflow3 = (rawName: string, rawAge: number) => {
     const name = parseName(rawName);
     const age = parseAge(rawAge);
 
@@ -58,7 +59,7 @@ const workflow3 = (rawName: string, rawAge: string) => {
 
 // But now we have a new problem: we need to unwrap the function and apply it to the remaining arguments.
 
-const workflow4 = (rawName: string, rawAge: string) => {
+const workflow4 = (rawName: string, rawAge: number) => {
     const name = parseName(rawName);
     const age = parseAge(rawAge);
 
@@ -84,9 +85,9 @@ const workflow4 = (rawName: string, rawAge: string) => {
 
 // [show Ap implementation]
 
-const workflow5 = (rawName: string, rawAge: string) => {
-    const result = E.ap(E.ap(E.map(createPerson)(parseName(rawName)))(parseAge(rawAge)))(
-        Right(Active())
+const workflow5 = (rawName: string, rawAge: number) => {
+    const result = E.ap(E.ap(E.ap(E.pure(createPerson))(parseName(rawName)))(parseAge(rawAge)))(
+        E.pure(Active())
     );
 
     return result;
@@ -98,7 +99,7 @@ const workflow5 = (rawName: string, rawAge: string) => {
 
 // [show the `liftA3` function]
 
-const workflow6 = (rawName: string, rawAge: string) => {
+const workflow6 = (rawName: string, rawAge: number) => {
     const result = E.liftA3(createPerson, parseName(rawName), parseAge(rawAge), E.pure(Active()));
 
     if (isLeft(result)) {
